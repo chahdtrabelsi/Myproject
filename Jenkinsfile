@@ -23,7 +23,7 @@ pipeline {
                         $class: 'GitSCM',
                         branches: [[name: "*/${branchName}"]],
                         userRemoteConfigs: [[
-                            url: 'https://github.com/chahdtrabelsi/Myproject.git'
+                            url: 'https://github.com/chahdtrabelsi/Myproject'
                         ]]
                     ])
                 }
