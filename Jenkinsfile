@@ -16,7 +16,7 @@ pipeline {
         stage('Checkout GitHub') {
             steps {
                 script {
-                    def branchName = env.BRANCH_NAME ?: 'main'  // beddel 'manager' b 'main'
+                    def branchName = env.BRANCH_NAME ?: 'main'  
                     echo "Branche détectée : ${branchName}"
 
                     checkout([
