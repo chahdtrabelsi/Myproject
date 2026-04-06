@@ -41,8 +41,7 @@ pipeline {
                             "-Dsonar.sources=. " +
                             "-Dsonar.login=%TOKEN% " +
                             "-Dsonar.projectVersion=1.0.0 " +
-                            "-Dsonar.sourceEncoding=UTF-8 " +
-                            "-Dsonar.branch.name=${env.BRANCH_NAME}"
+                            "-Dsonar.sourceEncoding=UTF-8"
                         }
                     }
                 }
