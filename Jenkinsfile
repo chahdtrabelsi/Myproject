@@ -1,48 +1,34 @@
 pipeline {
     agent any
 
+    environment {
+        SONAR_URL = "http://host.docker.internal:9000"
+    }
+
     stages {
-        stage('Check SonarScanner Installation') {
+
+        stage('Checkout') {
             steps {
-                script {
-                    def scannerHome = tool 'MySonarScanner'
-                    echo "SonarScanner should be installed at: ${scannerHome}"
-                    bat "dir \"${scannerHome}\\bin\\sonar-scanner.bat\""
-                    bat "\"${scannerHome}\\bin\\sonar-scanner.bat\" -v"
-                }
+                checkout scm
             }
         }
 
-        stage('Checkout GitHub') {
-            steps {
-                script {
-                    def branchName = env.BRANCH_NAME ?: 'main'  
-                    echo "Branche détectée : ${branchName}"
-
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: "*/${branchName}"]],
-                        userRemoteConfigs: [[
-                            url: 'https://github.com/chahdtrabelsi/Myproject'
-                        ]]
-                    ])
-                }
-            }
-        }
-
-        stage('Analyse SonarQube') {
+        stage('SonarQube Analysis') {
             steps {
                 script {
                     def scannerHome = tool 'MySonarScanner'
-                    withSonarQubeEnv('projet') {
-                        withCredentials([string(credentialsId: 'sonarqube', variable: 'TOKEN')]) {
-                            bat "\"${scannerHome}\\bin\\sonar-scanner.bat\" " +
-                            "-Dsonar.projectKey=Myproject " +  
-                            "-Dsonar.sources=. " +
-                            "-Dsonar.login=%TOKEN% " +
-                            "-Dsonar.projectVersion=1.0.0 " +
-                            "-Dsonar.sourceEncoding=UTF-8"
-                        }
+
+                    withCredentials([string(credentialsId: 'sonarqube', variable: 'TOKEN')]) {
+
+                        sh """
+                        ${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=Myproject \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=${SONAR_URL} \
+                        -Dsonar.login=${TOKEN} \
+                        -Dsonar.projectVersion=1.0.0 \
+                        -Dsonar.sourceEncoding=UTF-8
+                        """
                     }
                 }
             }
