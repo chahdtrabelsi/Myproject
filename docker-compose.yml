@@ -1,7 +1,5 @@
 version: '3.8'
-
 services:
-
   backend:
     build: ./backend
     ports:
@@ -10,23 +8,21 @@ services:
       - ./backend:/app
     environment:
       - NODE_ENV=development
-
   frontend:
     build: ./frontend
     ports:
       - "3000:80"
     depends_on:
       - backend
-
   jenkins:
     image: jenkins/jenkins:lts
     ports:
       - "8083:8080"
       - "50000:50000"
     volumes:
-      - jenkins_home:/var/jenkins_home  # ✅ Persistant
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock  # ← AJOUTÉ
     restart: unless-stopped
-
   sonarqube:
     image: sonarqube:lts
     ports:
@@ -34,7 +30,6 @@ services:
     volumes:
       - sonarqube_data:/opt/sonarqube/data
     restart: unless-stopped
-
   prometheus:
     image: prom/prometheus
     ports:
@@ -42,7 +37,6 @@ services:
     volumes:
       - prometheus_data:/prometheus
     restart: unless-stopped
-
 volumes:
   jenkins_home:
   sonarqube_data:
