@@ -15,7 +15,7 @@ spec:
       containers:
         - name: mon-conteneur
           image: tabelsichahd/mon-image:latest
-          imagePullPolicy: IfNotPresent  # Important pour minikube
+          imagePullPolicy: Always  # ← CHANGEMENT ICI
           ports:
             - containerPort: 5000
 ---
@@ -29,4 +29,4 @@ spec:
   ports:
     - port: 5000
       targetPort: 5000
-  type: NodePort  # Pour accéder depuis l'extérieur
+  type: NodePort
