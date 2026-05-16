@@ -1,24 +1,22 @@
 pipeline {
     agent any
     environment {
-        SONAR_URL      = "http://sonarqube:9000"
-        REGISTRY        = "votre-registry"          // ex: docker.io/monuser
+        SONAR_URL       = "http://sonarqube:9000"
+        // ── AJOUT ──────────────────────────────────────
+        REGISTRY        = "votre-registry"        // ex: docker.io/monuser
         IMAGE_NAME      = "mon-app"
-        IMAGE_TAG       = "${BUILD_NUMBER}"          // tag unique à chaque build
-        DEPLOYMENT_NAME = "mon-deployment"           // nom dans kubernetes
-        CONTAINER_NAME  = "mon-container"            // nom du container dans le yaml
-        NAMESPACE       = "default"                  // namespace kubernetes
+        IMAGE_TAG       = "${BUILD_NUMBER}"
+        DEPLOYMENT_NAME = "mon-deployment"
+        CONTAINER_NAME  = "mon-container"
+        NAMESPACE       = "default"
+        // ───────────────────────────────────────────────
     }
     stages {
-
-        // ─── 1. RÉCUPÉRER LE CODE ───────────────────────────────────────
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-
-        // ─── 2. ANALYSE SONARQUBE ───────────────────────────────────────
         stage('SonarQube Analysis') {
             steps {
                 script {
@@ -36,18 +34,18 @@ pipeline {
             }
         }
 
-        // ─── 3. BUILD DOCKER IMAGE ──────────────────────────────────────
+        // ── AJOUT : BUILD ──────────────────────────────
         stage('Build Docker Image') {
             steps {
                 sh "docker build -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ."
             }
         }
 
-        // ─── 4. PUSH VERS LE REGISTRY ───────────────────────────────────
+        // ── AJOUT : PUSH ───────────────────────────────
         stage('Push Docker Image') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'docker-registry-credentials',  // à créer dans Jenkins
+                    credentialsId: 'docker-credentials',
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
@@ -59,7 +57,7 @@ pipeline {
             }
         }
 
-        // ─── 5. DÉPLOYER SUR KUBERNETES ─────────────────────────────────
+        // ── AJOUT : DEPLOY ─────────────────────────────
         stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
@@ -69,21 +67,11 @@ pipeline {
                           --namespace=${NAMESPACE}
 
                         kubectl rollout status deployment/${DEPLOYMENT_NAME} \
-                          --namespace=${NAMESPACE} \
-                          --timeout=120s
+                          --namespace=${NAMESPACE} --timeout=120s
                     """
                 }
             }
         }
-    }
-
-    // ─── NOTIFICATIONS 
-    post {
-        success {
-            echo "✅ Déploiement réussi : ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
-        }
-        failure {
-            echo "❌ Pipeline échoué — vérifiez les logs"
-        }
+        // ───────────────────────────────────────────────
     }
 }
