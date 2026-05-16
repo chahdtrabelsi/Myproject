@@ -36,7 +36,8 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                // ← pointe vers le dossier backend
+                sh "docker build -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ./backend"
             }
         }
 
