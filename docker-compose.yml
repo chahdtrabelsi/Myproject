@@ -15,13 +15,15 @@ services:
     depends_on:
       - backend
   jenkins:
-    image: jenkins/jenkins:lts
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
     ports:
       - "8086:8080"
       - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock  # ← AJOUTÉ
+      - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
   sonarqube:
     image: sonarqube:lts
