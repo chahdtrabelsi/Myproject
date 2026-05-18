@@ -8,7 +8,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Test GET
 app.get("/", (req, res) => {
-  res.send("Backend is running 🚀,bonjour tous le monde !");
+  res.send("Backend is running 🚀");
 });
 
 // Webhook POST dédié
